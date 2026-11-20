@@ -344,3 +344,14 @@ async def test_thirty_seconds_of_everything_going_wrong(world, caplog):
     await session.aclose()
     bad = [r for r in caplog.records if r.levelno >= logging.ERROR and "avarole" in r.name]
     assert not bad, [r.getMessage() for r in bad]
+
+
+async def test_a_720p_avatar_reaches_the_room_at_full_size(world):
+    """Avarole's real avatar is 1280x720. It must arrive at that size, not at a simulcast layer's small one."""
+    w = world
+    w.stub.size = (1280, 720)
+    session = await start(w)
+    await avatar_visible(w, timeout=30)
+    await asyncio.sleep(3)
+    assert w.watch.video_sizes == {(1280, 720)}, w.watch.video_sizes
+    await session.aclose()

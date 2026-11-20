@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2
+Found by a real call to an Avarole agent (spoken question in, spoken answer out, avatar picture in the room).
+- The avatar's picture reaches the room at its full 1280x720. With simulcast on (the old default) a participant that
+  does not ask for a size was given the smallest layer, 320x180. `AvatarSession(simulcast=True)` brings it back.
+
 ## 0.1.1
 Found by running the plugin against a real LiveKit server (WebRTC), which the first release had only been tested
 against with stand-ins.

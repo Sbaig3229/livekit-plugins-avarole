@@ -37,6 +37,7 @@ class AvatarSession:
         actions: Optional[list] = None,
         client: Optional[AvaroleClient] = None,
         listen_to: Optional[Callable[[rtc.RemoteParticipant], bool]] = None,
+        simulcast: bool = False,
         **client_kwargs,
     ) -> None:
         if client is None:
@@ -45,6 +46,9 @@ class AvatarSession:
             client.register_actions(actions)
         self.client = client
         # By default Avarole hears every person in the room, and no other agent (so two agents never talk to each other).
+        # One full-resolution picture for everyone. Simulcast would re-encode three sizes (a heavy load for a worker) and a
+        # participant that does not ask for a size is given the smallest.
+        self._simulcast = simulcast
         self._listen_to = listen_to or (lambda p: p.kind != rtc.ParticipantKind.PARTICIPANT_KIND_AGENT)
         self._room: Optional[rtc.Room] = None
         self._avatar_room: Optional[rtc.Room] = None
@@ -223,7 +227,7 @@ class AvatarSession:
     async def _publish(self, kind: str, track: rtc.LocalTrack, source: rtc.TrackSource) -> None:
         if self._room is not None and self._room.isconnected():
             self._pubs[kind] = await self._room.local_participant.publish_track(
-                track, rtc.TrackPublishOptions(source=source)
+                track, rtc.TrackPublishOptions(source=source, simulcast=self._simulcast)
             )
 
     async def _unpublish(self, kind: str) -> None:

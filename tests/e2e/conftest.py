@@ -118,6 +118,7 @@ class Stub:
         self._pub_tasks = []
         self.ws_closed = asyncio.Event()
         self.reject = False
+        self.size = (VIDEO_W, VIDEO_H)
         self.frame_times = []
 
     async def start(self):
@@ -160,7 +161,8 @@ class Stub:
         room = rtc.Room()
         await room.connect(URL, token("avatar", sid))
         self.avatar_room = room
-        a_src, v_src = rtc.AudioSource(AVATAR_RATE, 1), rtc.VideoSource(VIDEO_W, VIDEO_H)
+        w, h = self.size
+        a_src, v_src = rtc.AudioSource(AVATAR_RATE, 1), rtc.VideoSource(w, h)
         await room.local_participant.publish_track(
             rtc.LocalAudioTrack.create_audio_track("voice", a_src),
             rtc.TrackPublishOptions(source=rtc.TrackSource.SOURCE_MICROPHONE),
@@ -180,9 +182,9 @@ class Stub:
         async def video():
             i = 0
             while True:
-                px = np.zeros((VIDEO_H, VIDEO_W, 4), dtype=np.uint8)
+                px = np.zeros((h, w, 4), dtype=np.uint8)
                 px[..., 0], px[..., 1], px[..., 2], px[..., 3] = (i * 6) % 256, 100, 200, 255
-                v_src.capture_frame(rtc.VideoFrame(VIDEO_W, VIDEO_H, rtc.VideoBufferType.RGBA, px.tobytes()))
+                v_src.capture_frame(rtc.VideoFrame(w, h, rtc.VideoBufferType.RGBA, px.tobytes()))
                 i += 1
                 await asyncio.sleep(1 / 15)
 

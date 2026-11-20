@@ -115,6 +115,7 @@ It also reads account data: `await call.agent_config()` (the assistant's public 
 ## Good to know
 
 - Everyone in the room is mixed into one microphone signal, so several people can talk at once.
+- The avatar's picture is published at its full size (1280x720). Re-encoding it costs about half a CPU core per call.
 - Calls last at most the agent's session limit (set on the Build page); `limit` / `ending` / `expired` tell you.
 - If the connection drops the client retries three times, then ends the call and emits `error`.
 - When the call ends, the avatar's video and voice are removed from your room (they are never left frozen there).
