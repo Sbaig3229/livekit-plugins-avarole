@@ -32,7 +32,7 @@ Documentation = "https://github.com/Sbaig3229/livekit-plugins-avarole#readme"
 Source = "https://github.com/Sbaig3229/livekit-plugins-avarole"
 
 [project.optional-dependencies]
-test = ["pytest>=8", "pytest-asyncio>=0.23"]
+test = ["pytest>=8", "pytest-asyncio>=0.23", "numpy"]
 
 [tool.hatch.version]
 path = "livekit/plugins/avarole/version.py"

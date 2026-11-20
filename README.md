@@ -114,18 +114,26 @@ It also reads account data: `await call.agent_config()` (the assistant's public 
 
 ## Good to know
 
+- Everyone in the room is mixed into one microphone signal, so several people can talk at once.
 - Calls last at most the agent's session limit (set on the Build page); `limit` / `ending` / `expired` tell you.
 - If the connection drops the client retries three times, then ends the call and emits `error`.
+- When the call ends, the avatar's video and voice are removed from your room (they are never left frozen there).
 - Page tools (clicking, scrolling) only exist in a browser; here the assistant is told they are unavailable.
-- Use one avatar per room. Another agent that also speaks in the room will not be heard by the avatar.
-- Status: **beta (0.x)**. The call client is covered by tests against a stand-in for the call service; run your own
-  end-to-end check against your LiveKit server before going live.
+- Use one avatar per room. Another agent that also speaks in the room is not heard by the avatar.
+- Tested against a real LiveKit server (1.13.11) with real WebRTC: picture and voice reach the room, one or several
+  people are heard at the right pitch and rate, reconnects, interrupts, leaving and rejoining, repeated calls
+  without leaks, and a 30-second run with people joining, leaving and the connection dropping twice.
 
 ## Development
 
 ```bash
 pip install -e ".[test]"
-pytest
+pytest tests --ignore=tests/e2e                   # fast, no server needed
+
+# against a real LiveKit server (WebRTC, nothing faked)
+git clone --branch v1.13.11 https://github.com/livekit/livekit && (cd livekit && go build -o ../livekit-server ./cmd/server)
+LIVEKIT_SERVER_BIN=$PWD/livekit-server pytest tests/e2e
+
 ruff check . && ruff format --check .
 ```
 

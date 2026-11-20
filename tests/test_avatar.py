@@ -26,6 +26,9 @@ class FakeRoom:
     def on(self, event, fn=None):
         self.handlers.setdefault(event, []).append(fn)
 
+    def off(self, event, fn=None):
+        self.handlers.get(event, []).remove(fn) if fn in self.handlers.get(event, []) else None
+
     def isconnected(self):
         return True
 

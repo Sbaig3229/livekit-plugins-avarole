@@ -1,9 +1,10 @@
-# Publishes to PyPI when a GitHub release is created. Uses PyPI Trusted Publishing: no token is stored anywhere.
-# One-time setup on pypi.org: Publishing > add a trusted publisher (repo, workflow "publish.yml", environment "pypi").
+# Publishes to PyPI when a version tag (v0.1.1, ...) is pushed. Uses PyPI Trusted Publishing: no token is stored anywhere.
+# Set up once on pypi.org: Publishing > trusted publisher (repo, workflow "publish.yml", environment "pypi").
 name: publish
 on:
-  release:
-    types: [published]
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
 jobs:
   pypi:
     runs-on: ubuntu-latest
@@ -14,5 +15,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
+      - name: The tag must match the package version
+        run: |
+          v=$(python -c "exec(open('livekit/plugins/avarole/version.py').read()); print(__version__)")
+          [ "v$v" = "${GITHUB_REF_NAME}" ] || { echo "tag ${GITHUB_REF_NAME} does not match version $v"; exit 1; }
+        if: startsWith(github.ref, 'refs/tags/')
       - run: pip install build && python -m build
       - uses: pypa/gh-action-pypi-publish@release/v1

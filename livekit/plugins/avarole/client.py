@@ -514,23 +514,33 @@ class AvaroleClient:
 
     # ----------------------------------------------------------- the account
 
+    async def _get_json(self, url: str, what: str, headers: Optional[dict] = None):
+        """GET for the account helpers. Outside a call there is no session to reuse, so a short-lived one is made
+        and always closed: a one-off ``agent_config()`` must not leave a connection open."""
+        http, temporary = self._http, False
+        if http is None or http.closed:
+            http, temporary = aiohttp.ClientSession(), True
+        try:
+            async with http.get(url, headers=headers) as r:
+                if r.status != 200:
+                    raise AvaroleError("could not %s (%s)" % (what, r.status))
+                return await r.json()
+        finally:
+            if temporary:
+                await http.close()
+
     async def agent_config(self) -> dict:
         """The assistant's public settings (name, avatar, language...) as configured in the dashboard."""
-        async with self._http_session().get(
-            "%s/assistant/agents/%s/config" % (self.app_url, quote(self.agent_id))
-        ) as r:
-            if r.status != 200:
-                raise AvaroleError("could not read the agent's settings (%s)" % r.status)
-            return await r.json()
+        return await self._get_json(
+            "%s/assistant/agents/%s/config" % (self.app_url, quote(self.agent_id)), "read the agent's settings"
+        )
 
     async def sessions(self, limit: int = 50, offset: int = 0) -> list:
         """Past calls on your account, newest first. Needs the API key."""
         if not self.api_key:
             raise AvaroleError("api_key is required to list sessions")
-        async with self._http_session().get(
+        return await self._get_json(
             "%s/assistant/sessions?limit=%d&offset=%d" % (self.app_url, max(1, min(limit, 200)), max(0, offset)),
+            "list sessions",
             headers={"X-API-Key": self.api_key},
-        ) as r:
-            if r.status != 200:
-                raise AvaroleError("could not list sessions (%s)" % r.status)
-            return await r.json()
+        )
