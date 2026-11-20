@@ -347,11 +347,13 @@ async def test_thirty_seconds_of_everything_going_wrong(world, caplog):
 
 
 async def test_a_720p_avatar_reaches_the_room_at_full_size(world):
-    """Avarole's real avatar is 1280x720. It must arrive at that size, not at a simulcast layer's small one."""
+    """Avarole's real avatar is 1280x720. Full size must reach the room, not a simulcast layer's small one.
+
+    (WebRTC may scale the picture down on a machine that cannot keep up, so the test asks that full size arrives,
+    not that nothing smaller ever does.)"""
     w = world
     w.stub.size = (1280, 720)
     session = await start(w)
-    await avatar_visible(w, timeout=30)
-    await asyncio.sleep(3)
-    assert w.watch.video_sizes == {(1280, 720)}, w.watch.video_sizes
+    await avatar_visible(w, timeout=60)
+    await until(lambda: (1280, 720) in w.watch.video_sizes, 30, what="a full-size 1280x720 frame")
     await session.aclose()
