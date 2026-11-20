@@ -1,0 +1,56 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "livekit-plugins-avarole"
+dynamic = ["version"]
+description = "Avarole plugin for LiveKit Agents: a live avatar that talks, listens and acts inside your LiveKit room"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+requires-python = ">=3.9"
+authors = [{ name = "Avarole", email = "support@avarole.com" }]
+keywords = ["livekit", "avarole", "avatar", "voice", "agents", "realtime", "webrtc", "ai"]
+classifiers = [
+  "Intended Audience :: Developers",
+  "Topic :: Multimedia :: Sound/Audio",
+  "Topic :: Multimedia :: Video",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3 :: Only",
+]
+dependencies = ["livekit-agents>=1.0", "aiohttp>=3.9"]
+
+[project.urls]
+Homepage = "https://avarole.com"
+Documentation = "https://github.com/Sbaig3229/livekit-plugins-avarole#readme"
+Source = "https://github.com/Sbaig3229/livekit-plugins-avarole"
+
+[project.optional-dependencies]
+test = ["pytest>=8", "pytest-asyncio>=0.23"]
+
+[tool.hatch.version]
+path = "livekit/plugins/avarole/version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["livekit"]
+
+[tool.hatch.build.targets.sdist]
+include = ["/livekit", "/tests", "/examples", "/README.md", "/LICENSE"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.ruff]
+line-length = 120
+extend-exclude = []
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B"]
+ignore = ["E501"]
